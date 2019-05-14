@@ -9,8 +9,9 @@ git-bash - Shortcut.lnk
 
 # local
 ObstacleRunnerPrototype/Help/
-ObstacleRunnerPrototype/ProjectSettings/
+# ObstacleRunnerPrototype/ProjectSettings/
 ObstacleRunnerPrototype/Packages/
+ObstacleRunnerPrototype/Logs/
 ObstacleRunnerPrototype/Assets/__Ignored/
 docfx_project/
 
