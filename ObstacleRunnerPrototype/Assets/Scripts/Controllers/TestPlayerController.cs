@@ -15,7 +15,13 @@ namespace ObstacleRunner
     {
         private NavMeshAgent navAgent;
         [SerializeField]
-        private Vector3 StartPositionOffset;
+        private Vector3 startPositionOffset;
+        private Quaternion startRotation;
+
+        private Coroutine inputRoutine;
+        private Action winAction;
+        private Action loseAction;
+
 
         #region Unity Callbacks
 
@@ -26,23 +32,39 @@ namespace ObstacleRunner
 
         private void Start()
         {
+            startRotation = transform.rotation;
+
             GameMaster.Instance.SubscribeOnLevelStart(OnLevelStartHandler);
+            GameMaster.Instance.SubscribeOnWin(OnWinHandler);
+            GameMaster.Instance.SubscribeOnLose(OnLoseHandler);
         }
 
         private void OnCollisionEnter(Collision collision)
         {
             //Lose if collide with obstacle!
+            if(loseAction != null && loseAction.Target != null)
+                loseAction();
         }
 
         private void OnTriggerEnter(Collider other)
         {
             //probably used to define if finishline reached
+            if (other.name == "FinishLine")
+                if(winAction != null && winAction.Target != null)
+                    winAction();
         }
 
         private void OnDestroy()
         {
-            if(GameMaster.Instance != null) //else has been destroyed before
-                GameMaster.Instance.SubscribeOnLevelStart(OnLevelStartHandler);
+            winAction = null;
+            loseAction = null;
+
+            if (GameMaster.Instance != null) //else has been destroyed before
+            {
+                GameMaster.Instance.UnsubscribeOnLevelStart(OnLevelStartHandler);
+                GameMaster.Instance.UnsubscribeOnWin(OnWinHandler);
+                GameMaster.Instance.UnsubscribeOnLose(OnLoseHandler);
+            }
         }
 
         #endregion
@@ -52,28 +74,63 @@ namespace ObstacleRunner
             while (true)
             {
                 if (Input.GetKey(KeyCode.Space))    //directives between android and editor required
+                {
                     navAgent.isStopped = true;
+                    navAgent.velocity = Vector3.zero;
+                }
                 else
+                {
                     navAgent.isStopped = false;
-
+                }
                 yield return null;
             }
         }
 
         #region Event Subscriber
-
+        
         protected virtual void OnLevelStartHandler(object sender,LevelStartArgs args)
         {
-            transform.position = args.StartPosition + StartPositionOffset; 
+            navAgent.enabled = true;
+
+            transform.position = args.StartPosition + startPositionOffset;
+            transform.rotation = startRotation;
+
+            winAction = args.WinAction;
+            loseAction = args.LoseAction;
+
+            navAgent.velocity = Vector3.zero;
             navAgent.SetDestination(args.FinishLinePosition);
-            StartCoroutine(InputRoutine());
+
+            if (inputRoutine != null)
+                StopCoroutine(inputRoutine);
+
+            inputRoutine = StartCoroutine(InputRoutine());
         }
 
         protected virtual void OnLevelRestart(object sender,EventArgs args)
         {
+            //...
+        }
 
+        protected virtual void OnWinHandler(object sender,EventArgs args)
+        {
+            //Win animation can be played
+            Disable();
+        }
+
+        protected virtual void OnLoseHandler(object sender,EventArgs args)
+        {
+            Disable();
         }
 
         #endregion
+
+        private void Disable()
+        {
+            winAction = null;
+            loseAction = null;
+            navAgent.enabled = false;
+            StopCoroutine(inputRoutine);
+        }
     }
 }

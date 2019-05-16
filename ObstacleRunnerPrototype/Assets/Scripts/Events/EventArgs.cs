@@ -18,12 +18,17 @@ namespace ObstacleRunner.Events
         public float GameSpeed { get; private set; }
         public Vector3 StartPosition { get; private set; }
         public Vector3 FinishLinePosition { get; private set; }
+        public Action WinAction { get; private set; }
+        public Action LoseAction { get; private set; }
 
-        public LevelStartArgs(float GameSpeed, Vector3 StartPosition, Vector3 FinishLinePosition)
+
+        public LevelStartArgs(float GameSpeed, Vector3 StartPosition, Vector3 FinishLinePosition,Action WinAction,Action LoseAction)
         {
             this.GameSpeed = GameSpeed;
             this.StartPosition = StartPosition;
             this.FinishLinePosition = FinishLinePosition;
+            this.WinAction = WinAction;
+            this.LoseAction = LoseAction;
         }
     }
 

@@ -22,6 +22,10 @@ namespace ObstacleRunner
         private Button restartButton;
         [SerializeField]
         private Button exitButton;
+        [SerializeField]
+        private GameObject winScrene;
+        [SerializeField]
+        private GameObject loseScrene;
 
         [SerializeField]
         private Transform startTransform;
@@ -50,6 +54,9 @@ namespace ObstacleRunner
             startButton.onClick.AddListener(StartGame);
             restartButton.onClick.AddListener(RestartLevel);
             exitButton.onClick.AddListener(Exit);
+
+            winScrene.SetActive(false);
+            loseScrene.SetActive(false);
         }
 
         #endregion
@@ -57,7 +64,7 @@ namespace ObstacleRunner
         private void StartGame()
         {
             OnSpeedChange(new SpeedChangeArgs(gameSpeed));  //or pass the gamespeed via the LevelStartArgs
-            OnLevelStart(new LevelStartArgs(gameSpeed,startTransform.position,finishLineTransform.position));
+            OnLevelStart(new LevelStartArgs(gameSpeed,startTransform.position,finishLineTransform.position,OnWin,OnLose));
 
             startButton.interactable = false;
         }
@@ -65,6 +72,8 @@ namespace ObstacleRunner
         //remove???
         private void RestartLevel()
         {
+            winScrene.SetActive(false);
+            loseScrene.SetActive(false);
             StartGame();    //... 
             //OnLevelRestart();
         }
@@ -141,10 +150,62 @@ namespace ObstacleRunner
         }
 
         #endregion
+        #region Win Event
+        event EventHandler win;
+
+        private void OnWin()
+        {
+            if (win != null)
+                win(this, EventArgs.Empty);
+        }
+
+        public void SubscribeOnWin(EventHandler handler)
+        {
+            win += handler;
+        }
+
+        public void UnsubscribeOnWin(EventHandler handler)
+        {
+            win -= handler;
+        }
+
+        #endregion
+
+        #region Lose Event
+        event EventHandler lose;
+
+        private void OnLose()
+        {
+            if (win != null)
+                lose(this, EventArgs.Empty);
+        }
+
+        public void SubscribeOnLose(EventHandler handler)
+        {
+            lose += handler;
+        }
+
+        public void UnsubscribeOnLose(EventHandler handler)
+        {
+            lose -= handler;
+        }
+
+        #endregion
 
         #endregion
 
         #region Event Subscriber
+
+        protected void OnWinHandler()
+        {
+            winScrene.SetActive(true);
+        }
+
+        protected void OnLoseHandler()
+        {
+            loseScrene.SetActive(false);
+        }
+
         #endregion
     }
 }

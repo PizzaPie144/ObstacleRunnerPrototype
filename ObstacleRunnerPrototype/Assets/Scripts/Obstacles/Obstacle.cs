@@ -29,12 +29,12 @@ namespace ObstacleRunner.Objstacles
 
         protected virtual void Start()
         {
-            //subscribe!
+            GameMaster.Instance.SubscribeOnLevelStart(OnLevelStart);
         }
 
         protected virtual void OnDestroy()
         {
-            //unsubscribe!
+            GameMaster.Instance.UnsubscribeOnLevelStart(OnLevelStart);
         }
 
         #endregion
