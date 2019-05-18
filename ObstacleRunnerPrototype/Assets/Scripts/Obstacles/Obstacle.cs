@@ -10,83 +10,78 @@ namespace ObstacleRunner.Objstacles
 {
     public abstract class Obstacle : MonoBehaviour
     {
-        //[SerializeField]
-        protected float baseSpeed;              //offset to fine tune move speed
+        [SerializeField]
+        protected float baseSpeed = 1f;              //offset to fine tune move speed
 
         protected float GameSpeed { get; set; } //allows to pass the state to running routines
         protected Coroutine MoveRoutine { get; set; }   //the current move routine executed, if any
+        protected bool isMoving { get; set; }
 
         protected Vector3 StartPosition { get; set; }
-        protected Quaternion StartRotations { get; set; }
+        protected Quaternion StartRotation { get; set; }
 
         #region Unity Callbacks
 
         protected virtual void Awake()
         {
+            GameSpeed = 1;
             StartPosition = transform.position;
-            StartRotations = transform.rotation;
+            StartRotation = transform.rotation;
         }
 
         protected virtual void Start()
         {
             GameMaster.Instance.SubscribeOnLevelStart(OnLevelStart);
+            GameMaster.Instance.SubscribeOnSpeedChange(OnSpeedChange);
         }
 
         protected virtual void OnDestroy()
         {
             GameMaster.Instance.UnsubscribeOnLevelStart(OnLevelStart);
+            GameMaster.Instance.UnsubscribeOnSpeedChange(OnSpeedChange);
         }
 
         #endregion
 
         protected virtual void BeginMove(bool moveON)
         {
+            isMoving = moveON;
             if (moveON)
             {
                 if (MoveRoutine != null)
-                {
-                    StopCoroutine(MoveRoutine);
-                    MoveRoutine = null;
-                }
+                    StopMove();
+
+                ResetState();
                 MoveRoutine = StartCoroutine(Move());
+                isMoving = true;
             }
-            else if (!moveON)
+            else
             {
-                StopCoroutine(MoveRoutine);
-                MoveRoutine = null;
+                StopMove();
+                isMoving = false;
             }
+                
         }
 
         protected virtual void OnLevelStart(object sender, LevelStartArgs args)
         {
-            transform.position = StartPosition;
-            transform.rotation = StartRotations;
-            BeginMove(false);
             BeginMove(true);
         }
 
-        protected virtual void OnLevelFinish(object sender, EventArgs args)   //arguably useless! only use incase Level is not Destroyed
-        {
-            BeginMove(false);       //stop previous movement
-            // or load game/main menu if it exists
-        }
-
-        protected virtual void OnLevelRestart(object sender, EventArgs args)  //Use this Instead of Reload Level
-        {
-            transform.position = StartPosition;
-            transform.rotation = StartRotations;
-            BeginMove(false);   //stop previous movement
-            BeginMove(true);
-        }
 
         protected virtual void OnSpeedChange(object sender, SpeedChangeArgs args)
         {
             GameSpeed = args.GameSpeed;
         }
 
-        protected abstract IEnumerator Move();
-        
+        protected virtual void ResetState()
+        {
+            transform.position = StartPosition;
+            transform.rotation = StartRotation;
+        }
 
+        protected abstract IEnumerator Move();
+        protected abstract void StopMove();
         
     }
 }

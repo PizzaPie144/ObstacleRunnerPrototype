@@ -14,15 +14,29 @@ namespace ObstacleRunner.Objstacles
     public class HelixObstacle : Obstacle
     {
         private Rigidbody rigidBody;
+        private Vector3 angularVelocity = new Vector3(1, 1, 1);
 
-        public Vector3 angularVelocity;
         #region Unity Callbacks
         protected override void Awake()
         {
             base.Awake();
             rigidBody = GetComponent<Rigidbody>();
-            
+
+            BeginMove(true);    //just for visual effect
         }
+
+        protected  void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                BeginMove(false);
+            }
+            if (Input.GetKeyDown(KeyCode.A))
+            {
+                BeginMove(true);
+            }
+        }
+
         #endregion
 
         #region Private Methods
@@ -33,31 +47,30 @@ namespace ObstacleRunner.Objstacles
             while (true)
             {
                 yield return null;
-                rigidBody.maxAngularVelocity = angularVelocity.y;
-                rigidBody.angularVelocity = angularVelocity;
+                rigidBody.maxAngularVelocity = angularVelocity.y * GameSpeed * baseSpeed;
+                rigidBody.angularVelocity = angularVelocity * GameSpeed * baseSpeed;
+
             }
         }
 
-        protected void StartMove(Vector3 angularVelocity)
+        protected override void ResetState()
         {
-            angularVelocity = angularVelocity* GameSpeed;
-            rigidBody.angularVelocity = angularVelocity;
+            base.ResetState();
+            rigidBody.velocity = Vector3.zero;
+            rigidBody.angularVelocity = Vector3.zero;
+        }
+
+        protected override void StopMove()
+        {
+            rigidBody.velocity = Vector3.zero;
+            rigidBody.angularVelocity = Vector3.zero;
+            
+            if(MoveRoutine != null)
+                StopCoroutine(MoveRoutine);
         }
         #region Overrides
-        //protected override IEnumerator Move()
-        //{
-        //    while (true)
-        //    {
-        //        //if (IsPaused)
-        //        //    yield return null;  //suspend execution while paused
+        
 
-        //        if (!IsPaused || true)
-        //        {
-        //            rigidBody.angularVelocity = angularVelocity;
-        //        }
-        //        //yield re
-        //    }
-    
         #endregion
 
         #region Event-Subscriber
