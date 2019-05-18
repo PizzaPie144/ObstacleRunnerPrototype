@@ -57,14 +57,19 @@ namespace ObstacleRunner
 
             winScrene.SetActive(false);
             loseScrene.SetActive(false);
+
+            SubscribeOnLose(OnLoseHandler);
+            SubscribeOnWin(OnWinHandler);
         }
 
         #endregion
 
         private void StartGame()
         {
+            winScrene.SetActive(false);
+            loseScrene.SetActive(false);
             OnSpeedChange(new SpeedChangeArgs(gameSpeed));  //or pass the gamespeed via the LevelStartArgs
-            OnLevelStart(new LevelStartArgs(gameSpeed,startTransform.position,finishLineTransform.position,OnWin,OnLose));
+            OnLevelStart(new LevelStartArgs(gameSpeed,startTransform.position,finishLineTransform.position,OnWin,OnLose,finishLineTransform.GetComponent<Collider>()));
 
         }
 
@@ -195,14 +200,14 @@ namespace ObstacleRunner
 
         #region Event Subscriber
 
-        protected void OnWinHandler()
+        protected void OnWinHandler(object sender, EventArgs args)
         {
             winScrene.SetActive(true);
         }
 
-        protected void OnLoseHandler()
+        protected void OnLoseHandler(object sender,EventArgs args)
         {
-            loseScrene.SetActive(false);
+            loseScrene.SetActive(true);
         }
 
         #endregion

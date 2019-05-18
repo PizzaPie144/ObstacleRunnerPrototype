@@ -20,15 +20,17 @@ namespace ObstacleRunner.Events
         public Vector3 FinishLinePosition { get; private set; }
         public Action WinAction { get; private set; }
         public Action LoseAction { get; private set; }
+        public Collider FinishLineTrigger { get; private set; }
 
 
-        public LevelStartArgs(float GameSpeed, Vector3 StartPosition, Vector3 FinishLinePosition,Action WinAction,Action LoseAction)
+        public LevelStartArgs(float GameSpeed, Vector3 StartPosition, Vector3 FinishLinePosition,Action WinAction,Action LoseAction,Collider FinishLineTrigger)
         {
             this.GameSpeed = GameSpeed;
             this.StartPosition = StartPosition;
             this.FinishLinePosition = FinishLinePosition;
             this.WinAction = WinAction;
             this.LoseAction = LoseAction;
+            this.FinishLineTrigger = FinishLineTrigger;
         }
     }
 
