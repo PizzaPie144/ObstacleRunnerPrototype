@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6013033606714053318}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: StraightX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42,7 +42,8 @@ GameObject:
   - component: {fileID: 8721080317705003844}
   - component: {fileID: 1373196566089620513}
   - component: {fileID: 2147911766291678625}
-  m_Layer: 0
+  - component: {fileID: 4180389754613468456}
+  m_Layer: 8
   m_Name: ID36
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -108,3 +109,16 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!65 &4180389754613468456
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7330045447915812550}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.0667999, y: 4.267201, z: 0}
+  m_Center: {x: -2.6669998, y: 2.1336005, z: 0}

@@ -13,9 +13,11 @@ namespace ObstacleRunner.Objstacles
         [SerializeField]
         protected float baseSpeed = 1f;              //offset to fine tune move speed
 
-        protected float GameSpeed { get; set; } //allows to pass the state to running routines
+        protected float GameSpeed { get; set; } = 1;//allows to pass the state to running routines
         protected Coroutine MoveRoutine { get; set; }   //the current move routine executed, if any
         protected bool isMoving { get; set; }
+
+        protected Rigidbody rigidbody;
 
         protected Vector3 StartPosition { get; set; }
         protected Quaternion StartRotation { get; set; }
@@ -24,9 +26,9 @@ namespace ObstacleRunner.Objstacles
 
         protected virtual void Awake()
         {
-            GameSpeed = 1;
             StartPosition = transform.position;
             StartRotation = transform.rotation;
+            rigidbody = GetComponent<Rigidbody>();
         }
 
         protected virtual void Start()

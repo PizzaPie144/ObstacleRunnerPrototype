@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8532893812116533800}
   - component: {fileID: 5547112733327912784}
   - component: {fileID: 4478889589909489477}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ID84
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -100,7 +100,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3702429362271302728}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Curve1
   m_TagString: Untagged
   m_Icon: {fileID: 0}

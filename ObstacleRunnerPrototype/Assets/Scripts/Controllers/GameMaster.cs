@@ -66,7 +66,6 @@ namespace ObstacleRunner
             OnSpeedChange(new SpeedChangeArgs(gameSpeed));  //or pass the gamespeed via the LevelStartArgs
             OnLevelStart(new LevelStartArgs(gameSpeed,startTransform.position,finishLineTransform.position,OnWin,OnLose));
 
-            startButton.interactable = false;
         }
 
         //remove???
