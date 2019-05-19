@@ -12,11 +12,13 @@ namespace ObstacleRunner.Objstacles
         private Vector3 downForce = new Vector3(1,1,1);
         private Vector3 upVelocity = new Vector3(-1, 0, 0);
         [SerializeField]
-        private float downForceBase = 25f;
+        private float downForceBase = 50f;
         [SerializeField]
         private float retractDelay;
         [SerializeField]
         private HammerHead hammerHead;
+        [SerializeField]
+        private float startDelay = 0;
 
         private HingeJoint hingeJoint;
 
@@ -30,16 +32,14 @@ namespace ObstacleRunner.Objstacles
 
         }
 
-        protected override void Start()
-        {
-            base.Start();
-            BeginMove(true);
-        }
-
         #endregion
 
+        #region Overrides
+
+        #region Abstracts
         protected override IEnumerator Move()
         {
+            yield return new WaitForSeconds(startDelay);
             bool isRetract = true;
             while (true)
             {
@@ -51,7 +51,6 @@ namespace ObstacleRunner.Objstacles
                     bool c = true;
                     float a;
                     float b;
-                    //CLEAN UP!
                     do
                     {
                         a = hingeJoint.angle;
@@ -59,7 +58,6 @@ namespace ObstacleRunner.Objstacles
                         c = hingeJoint.angle < hingeJoint.limits.max;               //What Sorcery is this?
                         //Debug.Log(hingeJoint.angle + " < ?? " + hingeJoint.limits.min + " -> " + (a < b));    
                         rigidbody.angularVelocity = upVelocity * baseSpeed * GameSpeed;
-                       //Debug.Log( -8 < -88);
                         yield return null;
                     } while (a > b);
                     isRetract = false;
@@ -98,12 +96,13 @@ namespace ObstacleRunner.Objstacles
             if (MoveRoutine != null)
                 StopCoroutine(MoveRoutine);
         }
-
+        #endregion
         protected override void ResetState()
         {
             base.ResetState();
             rigidbody.velocity = Vector3.zero;
             rigidbody.angularVelocity = Vector3.zero;
         }
+        #endregion
     }
 }

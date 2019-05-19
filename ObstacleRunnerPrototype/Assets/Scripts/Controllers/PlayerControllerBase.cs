@@ -83,10 +83,7 @@ namespace ObstacleRunner
         {
             if (other == finishLineTrigger)   
                 if (winAction != null && winAction.Target != null)
-                {
-                    Debug.Log("WIN!!!");
                     winAction();
-                }
         }
 
         private void OnAnimatorMove()
@@ -148,6 +145,7 @@ namespace ObstacleRunner
         protected virtual void OnWinHandler(object sender, EventArgs args)
         {
             _animator.SetBool(anim_move_id, false);
+            _animator.SetLayerWeight(_animator.GetLayerIndex("NoLegs"), 1);
             _animator.SetTrigger(anim_Win_id);          //win animation
             DisableMovement();
         }
@@ -173,6 +171,19 @@ namespace ObstacleRunner
                 StopCoroutine(moveRoutine);
         }
 
+        protected virtual void ResetState(Transform startTransform)
+        {
+            transform.rotation = startTransform.rotation;
+            transform.position = startTransform.position + startPositionOffset;
+            navAgent.velocity = Vector3.zero;
+            navAgent.enabled = true;
+            _animator.enabled = true;
+            _animator.SetLayerWeight(_animator.GetLayerIndex("NoLegs"), 0);
+            _animator.SetBool(anim_move_id, false);
+            _animator.SetFloat(anim_velx_id, 0f);
+            _animator.SetFloat(anim_vely_id, 0f);
+        }
+
         #region Abstract Methods
         protected virtual bool InputHandler()
         {
@@ -182,18 +193,5 @@ namespace ObstacleRunner
                 return false;
         }
         #endregion
-
-        protected virtual void ResetState(Transform startTransform)
-        {
-            transform.rotation = startTransform.rotation;
-            transform.position = startTransform.position + startPositionOffset;
-            navAgent.velocity = Vector3.zero;
-            navAgent.enabled = true;
-            _animator.enabled = true;
-            _animator.SetBool(anim_move_id, false);
-            _animator.SetFloat(anim_velx_id, 0f);
-            _animator.SetFloat(anim_vely_id, 0f);
-        }
-
     }
 }

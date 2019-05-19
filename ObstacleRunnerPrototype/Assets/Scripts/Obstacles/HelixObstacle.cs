@@ -13,34 +13,17 @@ namespace ObstacleRunner.Objstacles
     [RequireComponent(typeof(CapsuleCollider))]
     public class HelixObstacle : Obstacle
     {
+        [SerializeField]
         private Vector3 angularVelocity = new Vector3(1, 1, 1);
 
         #region Unity Callbacks
-        protected override void Awake()
-        {
-            base.Awake();
-
-            BeginMove(true);    //just for visual effect
-        }
-
-        //remove!
-        protected  void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.S))
-            {
-                BeginMove(false);
-            }
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                BeginMove(true);
-            }
-        }
 
         #endregion
 
-        #region Private Methods
+        #region Overrides
 
-        #endregion
+        #region Abstracts
+
         protected override IEnumerator Move()
         {
             while (true)
@@ -52,13 +35,6 @@ namespace ObstacleRunner.Objstacles
             }
         }
 
-        protected override void ResetState()
-        {
-            base.ResetState();
-            rigidbody.velocity = Vector3.zero;
-            rigidbody.angularVelocity = Vector3.zero;
-        }
-
         protected override void StopMove()
         {
             rigidbody.velocity = Vector3.zero;
@@ -67,12 +43,15 @@ namespace ObstacleRunner.Objstacles
             if(MoveRoutine != null)
                 StopCoroutine(MoveRoutine);
         }
-        #region Overrides
-        
-
         #endregion
 
-        #region Event-Subscriber
+        protected override void ResetState()
+        {
+            base.ResetState();
+            rigidbody.velocity = Vector3.zero;
+            rigidbody.angularVelocity = Vector3.zero;
+        }
+
         #endregion
     }
 }

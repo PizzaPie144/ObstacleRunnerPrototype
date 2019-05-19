@@ -35,6 +35,8 @@ namespace ObstacleRunner.Objstacles
         {
             GameMaster.Instance.SubscribeOnLevelStart(OnLevelStart);
             GameMaster.Instance.SubscribeOnSpeedChange(OnSpeedChange);
+
+            BeginMove(true);
         }
 
         protected virtual void OnDestroy()
@@ -62,7 +64,6 @@ namespace ObstacleRunner.Objstacles
                 StopMove();
                 isMoving = false;
             }
-                
         }
 
         protected virtual void OnLevelStart(object sender, LevelStartArgs args)
@@ -82,8 +83,9 @@ namespace ObstacleRunner.Objstacles
             transform.rotation = StartRotation;
         }
 
+        #region Abstacts
         protected abstract IEnumerator Move();
         protected abstract void StopMove();
-        
+        #endregion
     }
 }
