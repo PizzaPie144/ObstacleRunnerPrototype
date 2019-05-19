@@ -13,18 +13,27 @@ namespace ObstacleRunner
     {
         [SerializeField]
         private Vector3 startPositionOffset;
-        private Quaternion startRotation;
+        //private Quaternion startRotation;
+        //private Vector3 startPosition;
 
-        protected Coroutine moveRoutine;
-
-        private NavMeshAgent navAgent;
         private Action winAction;
         private Action loseAction;
         private Collider finishLineTrigger;
 
+        private NavMeshAgent navAgent;
         private Animator _animator;
         private Vector2 smoothDeltaPosition = Vector2.zero;
         private Vector2 velocity = Vector2.zero;
+
+        #region Animator Params
+        private int anim_move_id;
+        private int anim_velx_id;
+        private int anim_vely_id;
+        private int anim_Restart_id;
+        private int anim_Win_id;
+        #endregion
+
+        protected Coroutine moveRoutine;
 
         #region Unity Callbacks
 
@@ -36,15 +45,30 @@ namespace ObstacleRunner
 
         protected virtual void Start()
         {
-            startRotation = transform.rotation;
-            startPositionOffset = transform.position;       //!!!
+            anim_move_id = Animator.StringToHash("move");
+            anim_velx_id = Animator.StringToHash("velx");
+            anim_vely_id = Animator.StringToHash("vely");
+            anim_Restart_id = Animator.StringToHash("Restart");
+            anim_Win_id = Animator.StringToHash("Win");
 
             GameMaster.Instance.SubscribeOnLevelStart(OnLevelStartHandler);
             GameMaster.Instance.SubscribeOnWin(OnWinHandler);
             GameMaster.Instance.SubscribeOnLose(OnLoseHandler);
 
-            //navAgent.destination = new Vector3(-17.45f, 1.1f, 0.568f);
             navAgent.updatePosition = false;
+        }
+
+        protected virtual void OnDestroy()
+        {
+            winAction = null;
+            loseAction = null;
+
+            if (GameMaster.Instance != null) 
+            {
+                GameMaster.Instance.UnsubscribeOnLevelStart(OnLevelStartHandler);
+                GameMaster.Instance.UnsubscribeOnWin(OnWinHandler);
+                GameMaster.Instance.UnsubscribeOnLose(OnLoseHandler);
+            }
         }
 
         private void OnCollisionEnter(Collision collision)
@@ -63,20 +87,6 @@ namespace ObstacleRunner
                     Debug.Log("WIN!!!");
                     winAction();
                 }
-                    
-        }
-
-        protected virtual void OnDestroy()
-        {
-            winAction = null;
-            loseAction = null;
-
-            if (GameMaster.Instance != null) //else has been destroyed before
-            {
-                GameMaster.Instance.UnsubscribeOnLevelStart(OnLevelStartHandler);
-                GameMaster.Instance.UnsubscribeOnWin(OnWinHandler);
-                GameMaster.Instance.UnsubscribeOnLose(OnLoseHandler);
-            }
         }
 
         private void OnAnimatorMove()
@@ -90,35 +100,25 @@ namespace ObstacleRunner
         {
             while (true)
             {
-                //Debug.Log("Running");
-                //if (Input.GetKey(KeyCode.Space))
-                //    navAgent.isStopped = true;
-                //else
-                //    navAgent.isStopped = false;
                 navAgent.isStopped = InputHandler();
 
                 Vector3 worldDeltaPosition = navAgent.nextPosition - transform.position;
 
-                // Map 'worldDeltaPosition' to local space
                 float dx = Vector3.Dot(transform.right, worldDeltaPosition);
                 float dy = Vector3.Dot(transform.forward, worldDeltaPosition);
                 Vector2 deltaPosition = new Vector2(dx, dy);
 
-                // Low-pass filter the deltaMove
                 float smooth = Mathf.Min(1.0f, Time.deltaTime / 0.15f);
                 smoothDeltaPosition = Vector2.Lerp(smoothDeltaPosition, deltaPosition, smooth);
 
-                // Update velocity if delta time is safe
                 if (Time.deltaTime > 1e-5f)
                     velocity = smoothDeltaPosition / Time.deltaTime;
 
                 bool shouldMove = velocity.magnitude > 0.5f && navAgent.remainingDistance > navAgent.radius;
-                // Update animation parameters
-                _animator.SetBool("move", shouldMove);
-                _animator.SetFloat("velx", velocity.x);
-                _animator.SetFloat("vely", velocity.y);
+                _animator.SetBool(anim_move_id, shouldMove);
+                _animator.SetFloat(anim_velx_id, velocity.x);
+                _animator.SetFloat(anim_vely_id, velocity.y);
 
-                // Pull character towards agent
                 if (worldDeltaPosition.magnitude > navAgent.radius)
                     transform.position = navAgent.nextPosition - 0.9f * worldDeltaPosition;
 
@@ -130,54 +130,46 @@ namespace ObstacleRunner
 
         protected virtual void OnLevelStartHandler(object sender, LevelStartArgs args)
         {
-            Disable();
-            Debug.Log("Start");
-            //_animator.ResetTrigger("Lose");
-            //_animator.ResetTrigger("Win");
-            _animator.SetTrigger("Restart");
-            transform.position = startPositionOffset;//args.StartPosition + startPositionOffset;
-            transform.rotation = startRotation;
+            DisableMovement();
+            ResetState(args.StartTransform);
+
+            _animator.SetTrigger(anim_Restart_id);
 
             winAction = args.WinAction;
             loseAction = args.LoseAction;
 
-            navAgent.enabled = true;
-            navAgent.velocity = Vector3.zero;
             navAgent.destination = args.FinishLinePosition;
 
             finishLineTrigger = args.FinishLineTrigger;
-
-            if (moveRoutine != null)
-                StopCoroutine(moveRoutine);
 
             moveRoutine = StartCoroutine(Move());
         }
 
         protected virtual void OnWinHandler(object sender, EventArgs args)
         {
-            //_animator.ResetTrigger("")
-            Disable();
-            _animator.SetBool("move", false);
-            _animator.SetTrigger("Win");
+            _animator.SetBool(anim_move_id, false);
+            _animator.SetTrigger(anim_Win_id);          //win animation
+            DisableMovement();
         }
 
         protected virtual void OnLoseHandler(object sender, EventArgs args)
         {
-            Disable();
-            _animator.SetBool("move", false);
-            _animator.SetTrigger("Lose");
+            DisableMovement();
+            _animator.enabled = false;
         }
 
         #endregion
 
-        private void Disable()
+        private void DisableMovement()
         {
-            //_animator.ResetTrigger("Win");
-            //_animator.ResetTrigger("Lose");
             winAction = null;
             loseAction = null;
             navAgent.enabled = false;
-            if(moveRoutine != null)
+            _animator.SetBool(anim_move_id, false);
+            _animator.SetFloat(anim_velx_id, 0f);
+            _animator.SetFloat(anim_vely_id, 0f);
+
+            if (moveRoutine != null)
                 StopCoroutine(moveRoutine);
         }
 
@@ -191,6 +183,17 @@ namespace ObstacleRunner
         }
         #endregion
 
+        protected virtual void ResetState(Transform startTransform)
+        {
+            transform.rotation = startTransform.rotation;
+            transform.position = startTransform.position + startPositionOffset;
+            navAgent.velocity = Vector3.zero;
+            navAgent.enabled = true;
+            _animator.enabled = true;
+            _animator.SetBool(anim_move_id, false);
+            _animator.SetFloat(anim_velx_id, 0f);
+            _animator.SetFloat(anim_vely_id, 0f);
+        }
 
     }
 }

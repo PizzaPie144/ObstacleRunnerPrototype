@@ -32,7 +32,7 @@ namespace ObstacleRunner
         [SerializeField]
         private Transform finishLineTransform;
 
-        private float GameSpeed { get { return gameSpeed;  } set{ if(gameSpeed != value) OnSpeedChange(new SpeedChangeArgs(value)); gameSpeed = value; } } //on line to rule them all
+        private float GameSpeed { get { return gameSpeed; } set { if (gameSpeed != value) OnSpeedChange(new SpeedChangeArgs(value)); gameSpeed = value; } } //on line to rule them all
 
         public static GameMaster Instance { get { return instance; } }
 
@@ -69,7 +69,9 @@ namespace ObstacleRunner
             winScrene.SetActive(false);
             loseScrene.SetActive(false);
             OnSpeedChange(new SpeedChangeArgs(gameSpeed));  //or pass the gamespeed via the LevelStartArgs
-            OnLevelStart(new LevelStartArgs(gameSpeed,startTransform.position,finishLineTransform.position,OnWin,OnLose,finishLineTransform.GetComponent<Collider>()));
+            OnLevelStart(
+                new LevelStartArgs
+                (gameSpeed, startTransform, finishLineTransform.position, OnWin, OnLose, finishLineTransform.GetComponent<Collider>()));
 
         }
 
@@ -205,7 +207,7 @@ namespace ObstacleRunner
             winScrene.SetActive(true);
         }
 
-        protected void OnLoseHandler(object sender,EventArgs args)
+        protected void OnLoseHandler(object sender, EventArgs args)
         {
             loseScrene.SetActive(true);
         }

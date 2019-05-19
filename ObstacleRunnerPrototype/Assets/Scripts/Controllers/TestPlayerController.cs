@@ -92,7 +92,7 @@ namespace ObstacleRunner
         {
             navAgent.enabled = true;
 
-            transform.position = args.StartPosition + startPositionOffset;
+            transform.position = args.StartTransform.position + startPositionOffset;
             transform.rotation = startRotation;
 
             winAction = args.WinAction;
