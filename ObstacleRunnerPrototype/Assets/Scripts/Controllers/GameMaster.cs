@@ -9,13 +9,19 @@ using ObstacleRunner.Events;
 
 namespace ObstacleRunner
 {
-    //oversimplified Singleton
-    //NullRefException incase instance gets destroyed 
+    /// <summary>
+    /// Singleton* to dictate Game States and post notifications accordingly
+    /// Main menu buttons' methods
+    /// *Singleton implementation is partial
+    /// </summary>
     public class GameMaster : MonoBehaviour
     {
         private static GameMaster instance;
+        //Options
         [SerializeField]
-        private float gameSpeed;            //don't use!
+        private float gameSpeed;            
+
+        //UI Object References
         [SerializeField]
         private Button startButton;
         [SerializeField]
@@ -27,11 +33,15 @@ namespace ObstacleRunner
         [SerializeField]
         private GameObject loseScrene;
 
+        //Game Object References
         [SerializeField]
         private Transform startTransform;
         [SerializeField]
         private Transform finishLineTransform;
 
+        /// <summary>
+        /// Invokes SpeedChange Event if different value is set
+        /// </summary>
         private float GameSpeed { get { return gameSpeed; } set { if (gameSpeed != value) OnSpeedChange(new SpeedChangeArgs(value)); gameSpeed = value; } } //on line to rule them all
 
         public static GameMaster Instance { get { return instance; } }
@@ -64,34 +74,49 @@ namespace ObstacleRunner
 
         #endregion
 
+        #region UI Button Handlers
+
+        /// <summary>
+        /// Start Game button callback handler
+        /// </summary>
         private void StartGame()
         {
             winScrene.SetActive(false);
             loseScrene.SetActive(false);
-            OnSpeedChange(new SpeedChangeArgs(gameSpeed));  //or pass the gamespeed via the LevelStartArgs
+            OnSpeedChange(new SpeedChangeArgs(gameSpeed));  //or pass the gamespeed via the LevelStartArgs  
             OnLevelStart(
                 new LevelStartArgs
                 (gameSpeed, startTransform, finishLineTransform.position, OnWin, OnLose, finishLineTransform.GetComponent<Collider>()));
 
         }
 
-        //remove???
+        /// <summary>
+        /// Restart Button callback handler
+        /// Currently same as StartGame()
+        /// </summary>
         private void RestartLevel()
         {
-            winScrene.SetActive(false);
-            loseScrene.SetActive(false);
-            StartGame();    //... 
+            StartGame();     
             //OnLevelRestart();
         }
 
+        /// <summary>
+        /// Exit Button callback handler
+        /// </summary>
         private void Exit()
         {
             Application.Quit();
         }
+        
+        #endregion
 
         #region Event Publisher
         #region OnLevelStart Event
-        event EventHandler<LevelStartArgs> levelStart;
+
+        /// <summary>
+        /// Event invoked once game starts or restarts*
+        /// </summary>
+        private event EventHandler<LevelStartArgs> levelStart;
 
         private void OnLevelStart(LevelStartArgs args)
         {
@@ -99,6 +124,10 @@ namespace ObstacleRunner
                 levelStart(this, args);
         }
 
+        /// <summary>
+        /// Subscribe to Level Start Event, invocked each time Game mode starts
+        /// </summary>
+        /// <param name="handler"></param>
         public void SubscribeOnLevelStart(EventHandler<LevelStartArgs> handler)
         {
             levelStart += handler;
@@ -111,11 +140,15 @@ namespace ObstacleRunner
         #endregion
 
         #region OnPause Event
-
+        //there should probably be one!
         #endregion
 
         #region OnRestartLevel Event
-        event EventHandler levelRestart;
+
+        /// <summary>
+        /// Event invoked on Level Restart (*** Not Implemented)
+        /// </summary>
+        private event EventHandler levelRestart;
 
         private void OnLevelRestart()
         {
@@ -123,12 +156,16 @@ namespace ObstacleRunner
                 levelRestart(this, EventArgs.Empty);
         }
 
-        private void SubscribeOnLevelRestart(EventHandler handler)
+        /// <summary>
+        /// Subscribe to Level Restart Event (*** Not Implemented)
+        /// </summary>
+        /// <param name="handler"></param>
+        public void SubscribeOnLevelRestart(EventHandler handler)
         {
             levelRestart += handler;
         }
 
-        private void UnsubscribeOnLevelRestart(EventHandler handler)
+        public void UnsubscribeOnLevelRestart(EventHandler handler)
         {
             levelRestart -= handler;
         }
@@ -137,7 +174,10 @@ namespace ObstacleRunner
 
         #region OnSpeedChange Event
 
-        event EventHandler<SpeedChangeArgs> speedChange;
+        /// <summary>
+        /// Event invoked each time GameSpeed changes (*** Implemented, Not used)
+        /// </summary>
+        private event EventHandler<SpeedChangeArgs> speedChange;
 
         private void OnSpeedChange(SpeedChangeArgs args)
         {
@@ -145,6 +185,10 @@ namespace ObstacleRunner
                 speedChange(this, args);
         }
 
+        /// <summary>
+        /// Subscribe to Speed Change Event, Invoked each time Game Speed changes (*** Implemented, Not used)
+        /// </summary>
+        /// <param name="handler"></param>
         public void SubscribeOnSpeedChange(EventHandler<SpeedChangeArgs> handler)
         {
             speedChange += handler;
@@ -157,7 +201,11 @@ namespace ObstacleRunner
 
         #endregion
         #region Win Event
-        event EventHandler win;
+
+        /// <summary>
+        /// Event externally invoked once win conditions met
+        /// </summary>
+        private event EventHandler win;
 
         private void OnWin()
         {
@@ -165,6 +213,10 @@ namespace ObstacleRunner
                 win(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Subscribe to Win Event, Invoked once Win conditions met
+        /// </summary>
+        /// <param name="handler"></param>
         public void SubscribeOnWin(EventHandler handler)
         {
             win += handler;
@@ -178,7 +230,11 @@ namespace ObstacleRunner
         #endregion
 
         #region Lose Event
-        event EventHandler lose;
+
+        /// <summary>
+        /// Event externally invoked once lose conditions met
+        /// </summary>
+        private event EventHandler lose;
 
         private void OnLose()
         {
@@ -186,6 +242,10 @@ namespace ObstacleRunner
                 lose(this, EventArgs.Empty);
         }
 
+        /// <summary>
+        /// Subscribe to Lose Event, Invoked once lose conditions met
+        /// </summary>
+        /// <param name="handler"></param>
         public void SubscribeOnLose(EventHandler handler)
         {
             lose += handler;

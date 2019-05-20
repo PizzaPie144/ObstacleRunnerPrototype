@@ -4,18 +4,22 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using ObstacleRunner.Events;
-
 namespace ObstacleRunner.Objstacles
 {
+    /// <summary>
+    /// Pendulum Obstacle, moved via gravity like effect
+    /// </summary>
     public class PendulumObstacle : Obstacle
     {
+        //Delay before movement starts
         [SerializeField]
         private float startDelay;
+        //Downard constant force applied
         private Vector3 downForce = new Vector3(0, -10f, 0);
+        //Force to set Obstcle to side most position
         private Vector3 sideForce = new Vector3(0, 0, -50f);
 
-        HingeJoint hingeJoint;
+        private HingeJoint hingeJoint;
 
         #region Unity Callbacks
 
@@ -29,10 +33,16 @@ namespace ObstacleRunner.Objstacles
         #endregion
 
         #region Overrides
+
         #region Abstacts
+
+        /// <summary>
+        /// Move method, defines how Obstacle moves
+        /// </summary>
+        /// <returns></returns>
         protected override IEnumerator Move()
         {
-            if(startDelay != 0)
+            if (startDelay != 0)
                 yield return new WaitForSeconds(startDelay);
 
             do
@@ -40,7 +50,7 @@ namespace ObstacleRunner.Objstacles
                 if ((hingeJoint.limits.max - hingeJoint.angle) <= 2)
                     break;
 
-                rigidbody.AddForce(sideForce * baseSpeed);
+                rigidbody.AddForce(sideForce * baseSpeed * GameSpeed);
                 yield return null;
 
             } while (true);
@@ -50,7 +60,7 @@ namespace ObstacleRunner.Objstacles
 
             while (true)
             {
-                rigidbody.AddForce(downForce * baseSpeed);
+                rigidbody.AddForce(downForce * baseSpeed * GameSpeed);
 
                 yield return null;
             }

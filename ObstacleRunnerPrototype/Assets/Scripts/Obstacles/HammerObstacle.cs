@@ -3,33 +3,37 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using ObstacleRunner.Events;
-
 namespace ObstacleRunner.Objstacles
 {
+    /// <summary>
+    /// Hammer Obstacle, should be coupled with HammerHead Component
+    /// </summary>
     public class HammerObstacle : Obstacle
     {
+        //Downward force applied
         private Vector3 downForce = new Vector3(1,1,1);
+        //Constant velocity of Obstacle while moving upwards
         private Vector3 upVelocity = new Vector3(-1, 0, 0);
+
         [SerializeField]
         private float downForceBase = 50f;
         [SerializeField]
+        //delay before obstacle moves upwards, once reached bottom
         private float retractDelay;
         [SerializeField]
         private HammerHead hammerHead;
         [SerializeField]
+        //delay before Obstacle starts move
         private float startDelay = 0;
 
         private HingeJoint hingeJoint;
 
-        
         #region Unity Callbacks
 
         protected override void Awake()
         {
             base.Awake();
             hingeJoint = GetComponent<HingeJoint>();
-
         }
 
         #endregion
@@ -37,13 +41,18 @@ namespace ObstacleRunner.Objstacles
         #region Overrides
 
         #region Abstracts
+
+        /// <summary>
+        /// Move method, defines how Obstacle moves
+        /// </summary>
+        /// <returns></returns>
         protected override IEnumerator Move()
         {
             yield return new WaitForSeconds(startDelay);
             bool isRetract = true;
             while (true)
             {
-                //up
+                //Up
                 if (isRetract)
                 {
                     rigidbody.angularVelocity = Vector3.zero;
@@ -56,7 +65,6 @@ namespace ObstacleRunner.Objstacles
                         a = hingeJoint.angle;
                         b = hingeJoint.limits.min;
                         c = hingeJoint.angle < hingeJoint.limits.max;               //What Sorcery is this?
-                        //Debug.Log(hingeJoint.angle + " < ?? " + hingeJoint.limits.min + " -> " + (a < b));    
                         rigidbody.angularVelocity = upVelocity * baseSpeed * GameSpeed;
                         yield return null;
                     } while (a > b);

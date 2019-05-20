@@ -3,22 +3,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using ObstacleRunner;
 using ObstacleRunner.Events;
 
 namespace ObstacleRunner.Objstacles
 {
+    /// <summary>
+    /// Base class for all Obstacles
+    /// </summary>
     public abstract class Obstacle : MonoBehaviour
     {
+        //Factor to fine tune move speed individually for each Obstacle
         [SerializeField]
-        protected float baseSpeed = 1f;              //offset to fine tune move speed
+        protected float baseSpeed = 1f;
 
-        protected float GameSpeed { get; set; } = 1;//allows to pass the state to running routines
-        protected Coroutine MoveRoutine { get; set; }   //the current move routine executed, if any
-        protected bool isMoving { get; set; }
-
+        //allows to pass the speed state to running routines
+        protected float GameSpeed { get; set; } = 1;
+        //the current move routine executed, if any
+        protected Coroutine MoveRoutine { get; set; }   
+        
         protected Rigidbody rigidbody;
 
+        //use to save initial state
         protected Vector3 StartPosition { get; set; }
         protected Quaternion StartRotation { get; set; }
 
@@ -33,6 +38,7 @@ namespace ObstacleRunner.Objstacles
 
         protected virtual void Start()
         {
+            //Events Subscriptions
             GameMaster.Instance.SubscribeOnLevelStart(OnLevelStart);
             GameMaster.Instance.SubscribeOnSpeedChange(OnSpeedChange);
 
@@ -41,15 +47,22 @@ namespace ObstacleRunner.Objstacles
 
         protected virtual void OnDestroy()
         {
-            GameMaster.Instance.UnsubscribeOnLevelStart(OnLevelStart);
-            GameMaster.Instance.UnsubscribeOnSpeedChange(OnSpeedChange);
+            //Events Unsubscribe
+            if (GameMaster.Instance != null)
+            {
+                GameMaster.Instance.UnsubscribeOnLevelStart(OnLevelStart);
+                GameMaster.Instance.UnsubscribeOnSpeedChange(OnSpeedChange);
+            }
         }
 
         #endregion
 
+        /// <summary>
+        /// Base method to Start and Stop Movement
+        /// </summary>
+        /// <param name="moveON"></param>
         protected virtual void BeginMove(bool moveON)
         {
-            isMoving = moveON;
             if (moveON)
             {
                 if (MoveRoutine != null)
@@ -57,12 +70,10 @@ namespace ObstacleRunner.Objstacles
 
                 ResetState();
                 MoveRoutine = StartCoroutine(Move());
-                isMoving = true;
             }
             else
             {
                 StopMove();
-                isMoving = false;
             }
         }
 
@@ -77,6 +88,9 @@ namespace ObstacleRunner.Objstacles
             GameSpeed = args.GameSpeed;
         }
 
+        /// <summary>
+        /// Resets state to initial 
+        /// </summary>
         protected virtual void ResetState()
         {
             transform.position = StartPosition;
@@ -84,7 +98,16 @@ namespace ObstacleRunner.Objstacles
         }
 
         #region Abstacts
+        
+        /// <summary>
+        /// Abstract method to define Movement
+        /// </summary>
+        /// <returns></returns>
         protected abstract IEnumerator Move();
+
+        /// <summary>
+        /// Abstact method to define Stop Movement
+        /// </summary>
         protected abstract void StopMove();
         #endregion
     }

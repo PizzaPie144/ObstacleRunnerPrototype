@@ -2,28 +2,41 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HammerHead : MonoBehaviour
+namespace ObstacleRunner.Objstacles
 {
-    private int layerID;
-    private int inversedLayerID;
-    public float range;
-
-    private void Awake()
+    /// <summary>
+    /// Component to allow HammerObstacle know when to Restract (should be Coupled with HammerObstacle)
+    /// </summary>
+    public class HammerHead : MonoBehaviour
     {
-        layerID = LayerMask.NameToLayer("Pathway");
-        inversedLayerID = 1 << layerID;
-    }
+        private int layerID;
+        private int inversedLayerID;
 
-    public bool RaycastPathway()
-    {
-        RaycastHit hit;
+        //Raycast range to fine tune HammerHead and path collision effect
+        [SerializeField]
+        private float range;
 
-        if(Physics.Raycast(transform.position,Vector3.down,out hit, range, inversedLayerID))
+        private void Awake()
         {
-            if(hit.collider.gameObject.layer == layerID)
-                return true;
+            layerID = LayerMask.NameToLayer("Pathway");
+            inversedLayerID = 1 << layerID;
         }
-        return false;
-    }
 
+        /// <summary>
+        /// Raycast against Pathway Layer
+        /// </summary>
+        /// <returns></returns>
+        public bool RaycastPathway()
+        {
+            RaycastHit hit;
+
+            if (Physics.Raycast(transform.position, Vector3.down, out hit, range, inversedLayerID))
+            {
+                if (hit.collider.gameObject.layer == layerID)
+                    return true;
+            }
+            return false;
+        }
+
+    }
 }

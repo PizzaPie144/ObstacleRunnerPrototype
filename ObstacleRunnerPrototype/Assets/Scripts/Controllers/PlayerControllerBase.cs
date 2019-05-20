@@ -9,19 +9,25 @@ using ObstacleRunner.Events;
 
 namespace ObstacleRunner
 {
-    public /*abstract*/ class PlayerControllerBase : MonoBehaviour
+    /// <summary>
+    /// Base compoenent for Player Controllers, allows abstract implementation of Input (movemnt commands)
+    /// Controls Player movement, recieves Game state change notifications via Events published by GameMaster
+    /// </summary>
+    public abstract class PlayerControllerBase : MonoBehaviour
     {
+        //Value to fine tune initial player position
         [SerializeField]
         private Vector3 startPositionOffset;
-        //private Quaternion startRotation;
-        //private Vector3 startPosition;
 
+        //action invoked when win conditions met
         private Action winAction;
+        //action invoked when lose conditions met
         private Action loseAction;
         private Collider finishLineTrigger;
 
         private NavMeshAgent navAgent;
         private Animator _animator;
+
         private Vector2 smoothDeltaPosition = Vector2.zero;
         private Vector2 velocity = Vector2.zero;
 
@@ -33,6 +39,7 @@ namespace ObstacleRunner
         private int anim_Win_id;
         #endregion
 
+        //member field to track current move coroutine
         protected Coroutine moveRoutine;
 
         #region Unity Callbacks
@@ -45,12 +52,14 @@ namespace ObstacleRunner
 
         protected virtual void Start()
         {
+            //Animator parameters matching
             anim_move_id = Animator.StringToHash("move");
             anim_velx_id = Animator.StringToHash("velx");
             anim_vely_id = Animator.StringToHash("vely");
             anim_Restart_id = Animator.StringToHash("Restart");
             anim_Win_id = Animator.StringToHash("Win");
 
+            //events subscriptions
             GameMaster.Instance.SubscribeOnLevelStart(OnLevelStartHandler);
             GameMaster.Instance.SubscribeOnWin(OnWinHandler);
             GameMaster.Instance.SubscribeOnLose(OnLoseHandler);
@@ -63,6 +72,7 @@ namespace ObstacleRunner
             winAction = null;
             loseAction = null;
 
+            //events unsubscribe
             if (GameMaster.Instance != null) 
             {
                 GameMaster.Instance.UnsubscribeOnLevelStart(OnLevelStartHandler);
@@ -73,6 +83,7 @@ namespace ObstacleRunner
 
         private void OnCollisionEnter(Collision collision)
         {
+            //Lose Conditions* 
             if (loseAction != null && loseAction.Target != null)
             {
                 loseAction();
@@ -81,6 +92,7 @@ namespace ObstacleRunner
 
         private void OnTriggerEnter(Collider other)
         {
+            //Win Conditions*
             if (other == finishLineTrigger)   
                 if (winAction != null && winAction.Target != null)
                     winAction();
@@ -93,6 +105,10 @@ namespace ObstacleRunner
 
         #endregion
 
+        /// <summary>
+        /// Movement/ Input Routine
+        /// </summary>
+        /// <returns></returns>
         protected virtual IEnumerator Move()
         {
             while (true)
@@ -146,7 +162,7 @@ namespace ObstacleRunner
         {
             _animator.SetBool(anim_move_id, false);
             _animator.SetLayerWeight(_animator.GetLayerIndex("NoLegs"), 1);
-            _animator.SetTrigger(anim_Win_id);          //win animation
+            _animator.SetTrigger(anim_Win_id);          
             DisableMovement();
         }
 
@@ -158,7 +174,10 @@ namespace ObstacleRunner
 
         #endregion
 
-        private void DisableMovement()
+        /// <summary>
+        /// Disables Movement (Animator, NavMeshAgent, Stops MoveRoutine, Resets Animator parameters state)
+        /// </summary>
+        protected void DisableMovement()
         {
             winAction = null;
             loseAction = null;
@@ -171,6 +190,10 @@ namespace ObstacleRunner
                 StopCoroutine(moveRoutine);
         }
 
+        /// <summary>
+        /// Reset State to initial state defined by Start Transform, supplied by GameMaster, enables Components
+        /// </summary>
+        /// <param name="startTransform"></param>
         protected virtual void ResetState(Transform startTransform)
         {
             transform.rotation = startTransform.rotation;
@@ -185,13 +208,13 @@ namespace ObstacleRunner
         }
 
         #region Abstract Methods
-        protected virtual bool InputHandler()
-        {
-            if (Input.GetKey(KeyCode.Space) || Input.GetMouseButton(0))    //directives between android and editor required
-                return true;
-            else
-                return false;
-        }
+
+        /// <summary>
+        /// Binary abstract method, true = Stop Movement, false = Start Movement (*see Move() method)
+        /// </summary>
+        /// <returns></returns>
+        protected abstract bool InputHandler();
+        
         #endregion
     }
 }

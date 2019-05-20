@@ -4,16 +4,16 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using ObstacleRunner;
-using ObstacleRunner.Events;
-
 namespace ObstacleRunner.Objstacles
 {
+    /// <summary>
+    /// Helix Obstacle, constant move speed
+    /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(CapsuleCollider))]
     public class HelixObstacle : Obstacle
     {
-        [SerializeField]
+        //angular velocity speed set to Obstacle
         private Vector3 angularVelocity = new Vector3(1, 1, 1);
 
         #region Unity Callbacks
@@ -24,6 +24,10 @@ namespace ObstacleRunner.Objstacles
 
         #region Abstracts
 
+        /// <summary>
+        /// Move method, defines how Obstacle moves
+        /// </summary>
+        /// <returns></returns>
         protected override IEnumerator Move()
         {
             while (true)
